@@ -47,7 +47,12 @@ export function TimerControls({
             }}
             transition={{ duration: 0.5 }}
           >
-            {inputSequence ? `${inputSequence.padStart(2, "0")}:00` : formatTime(totalSeconds)} min
+            {inputSequence ? (() => {
+              const minutes = parseFloat(inputSequence)
+              const wholeMinutes = Math.floor(minutes)
+              const seconds = (minutes % 1) * 60
+              return `${wholeMinutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+            })() : formatTime(totalSeconds)} min
           </motion.div>
         </div>
       </div>

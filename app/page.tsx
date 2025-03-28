@@ -4,7 +4,7 @@ import TimerWrapper from "@/components/timer-wrapper"
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-timer-background relative">
-      <div className="absolute top-4 text-gray-400 text-sm">Timer was built with ❤️ in Hong Kong</div>
+      <div className="absolute top-4 text-gray-300 text-sm">T:mer – Built in Hong Kong</div>
       <Suspense fallback={<TimerFallback />}>
         <TimerWrapper />
       </Suspense>

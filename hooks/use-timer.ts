@@ -34,10 +34,10 @@ export function useTimer(initialSeconds: number): [TimerState, TimerControls] {
   // Apply the input sequence
   const applyInputSequence = useCallback(() => {
     if (state.inputSequence) {
-      const minutes = Number.parseInt(state.inputSequence, 10)
+      const minutes = parseFloat(state.inputSequence)
       const limitedMinutes = Math.min(minutes, 30)
       if (!isNaN(limitedMinutes) && limitedMinutes > 0) {
-        const seconds = limitedMinutes * 60
+        const seconds = Math.round(limitedMinutes * 60)
         setState(prev => ({
           ...prev,
           totalSeconds: seconds,

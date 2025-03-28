@@ -29,29 +29,31 @@ export function useAudio() {
     try {
       // Create a gain node for volume control
       const gainNode = audioContext.createGain()
-      gainNode.gain.value = 0.3 // Set volume to 30%
+      gainNode.gain.value = 0.4 // Increased from 0.2 to 0.4 (40% volume)
       gainNode.connect(audioContext.destination)
 
-      // First beep
-      const oscillator1 = audioContext.createOscillator()
-      oscillator1.type = "sine"
-      oscillator1.frequency.value = 830 // Hz
-      oscillator1.connect(gainNode)
-
-      // Start and stop the first beep
+      // Create a more pleasant chime-like sound
+      const frequencies = [880, 1108.73, 1318.51, 1760] // A5, C#6, E6, A6
       const now = audioContext.currentTime
-      oscillator1.start(now)
-      oscillator1.stop(now + 0.2)
 
-      // Second beep (higher pitch)
-      const oscillator2 = audioContext.createOscillator()
-      oscillator2.type = "sine"
-      oscillator2.frequency.value = 1080 // Hz
-      oscillator2.connect(gainNode)
-
-      // Start and stop the second beep after a short delay
-      oscillator2.start(now + 0.3)
-      oscillator2.stop(now + 0.5)
+      frequencies.forEach((freq, index) => {
+        const oscillator = audioContext.createOscillator()
+        const noteGain = audioContext.createGain()
+        
+        oscillator.type = "sine"
+        oscillator.frequency.value = freq
+        
+        // Create a gentle attack and release
+        noteGain.gain.setValueAtTime(0, now + index * 0.1)
+        noteGain.gain.linearRampToValueAtTime(0.6, now + index * 0.1 + 0.05) // Increased from 0.3 to 0.6
+        noteGain.gain.exponentialRampToValueAtTime(0.01, now + index * 0.1 + 0.5)
+        
+        oscillator.connect(noteGain)
+        noteGain.connect(gainNode)
+        
+        oscillator.start(now + index * 0.1)
+        oscillator.stop(now + index * 0.1 + 0.5)
+      })
     } catch (error) {
       console.error("Error playing notification sound:", error)
     }

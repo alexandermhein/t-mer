@@ -53,8 +53,29 @@ export function useTimerKeyboard({
           clearTimeout(inputTimeoutRef.current)
         }
         setInputSequence((prev: string) => {
-          if (prev.length < 2) {
+          if (prev.length === 0 && e.key === '0') {
+            return prev
+          }
+          if (prev.includes('.')) {
+            if (prev.split('.')[1]?.length < 1) {
+              return prev + e.key
+            }
+          } else if (prev.length < 2) {
             return prev + e.key
+          }
+          return prev
+        })
+      } else if (e.key === '.') {
+        e.preventDefault()
+        if (inputTimeoutRef.current) {
+          clearTimeout(inputTimeoutRef.current)
+        }
+        setInputSequence((prev: string) => {
+          if (prev.length === 0) {
+            return '0.5'
+          }
+          if (!prev.includes('.') && prev.length > 0) {
+            return prev + '.5'
           }
           return prev
         })

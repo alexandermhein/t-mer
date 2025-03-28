@@ -6,9 +6,30 @@ import { TimerControls } from "./timer-controls"
 import { useTimer } from "@/hooks/use-timer"
 import { useTimerKeyboard } from "@/hooks/use-timer-keyboard"
 import { TimerProps } from "@/types/timer"
+import { useEffect, useState } from "react"
 
 export default function Timer({ initialSeconds = 300 }: TimerProps) {
   const [state, controls] = useTimer(initialSeconds)
+  const [isFinished, setIsFinished] = useState(false)
+
+  // Reset finished state when any key is pressed
+  useEffect(() => {
+    const handleKeyPress = () => {
+      if (isFinished) {
+        setIsFinished(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [isFinished])
+
+  // Set finished state when timer reaches zero
+  useEffect(() => {
+    if (state.remainingSeconds === 0 && !state.isRunning) {
+      setIsFinished(true)
+    }
+  }, [state.remainingSeconds, state.isRunning])
 
   useTimerKeyboard({
     isRunning: state.isRunning,
@@ -46,6 +67,8 @@ export default function Timer({ initialSeconds = 300 }: TimerProps) {
         remainingSeconds={state.remainingSeconds}
         isRunning={state.isRunning}
         totalSeconds={state.totalSeconds}
+        showControls={state.showControls}
+        isFinished={isFinished}
       />
 
       <AnimatePresence>
