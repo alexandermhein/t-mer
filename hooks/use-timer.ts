@@ -105,11 +105,12 @@ export function useTimer(initialSeconds: number): [TimerState, TimerControls] {
       showControls: true,
     })),
     handleSliderChange: (value: number[]) => {
-      const newSeconds = Math.round(value[0] * 60)
+      const newSeconds = Math.round(value[0]) * 60
       setState(prev => ({
         ...prev,
         totalSeconds: newSeconds,
         remainingSeconds: newSeconds,
+        isAnimating: false,
       }))
     },
     setInputSequence: (value: string) => {

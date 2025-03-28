@@ -31,21 +31,19 @@ export function TimerControls({
       className="absolute z-10 bg-white rounded-2xl shadow-lg p-8 w-full max-w-md mx-auto"
     >
       <div className="text-center mb-8">
-        <div className="relative inline-block overflow-hidden rounded-full">
+        <div className="relative inline-block overflow-hidden rounded-[8px]">
           <motion.div
+            key={inputSequence ? 'animating' : 'not-animating'}
             className="absolute inset-0 bg-timer-purple origin-left"
             initial={{ scaleX: 0 }}
-            animate={{
-              scaleX: isAnimating ? 1 : 0,
-            }}
-            exit={{ scale: 0 }}
-            transition={{ duration: 0.5, ease: "linear" }}
+            animate={{ scaleX: inputSequence ? 1 : 0 }}
+            transition={{ duration: 0.5 }}
           />
           <motion.div
             className="relative inline-block px-4 py-2 text-gray-800 text-sm z-10"
             animate={{
-              color: isAnimating ? "#ffffff" : "#1f2937",
-              backgroundColor: isAnimating ? "transparent" : "#f3f4f6",
+              color: inputSequence ? "#ffffff" : "#1f2937",
+              backgroundColor: inputSequence ? "transparent" : "#f3f4f6",
             }}
             transition={{ duration: 0.5 }}
           >
@@ -69,6 +67,11 @@ export function TimerControls({
             background-color: #c732b3;
             border: 2px solid #ffffff;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: not-allowed;
+          }
+          .slider-custom[data-disabled] {
+            opacity: 0.7;
+            cursor: not-allowed;
           }
         `}</style>
         <div className="slider-custom">
@@ -76,9 +79,10 @@ export function TimerControls({
             value={sliderValue}
             min={0}
             max={30}
-            step={0.5}
+            step={1}
             onValueChange={onSliderChange}
             className="w-full"
+            disabled
           />
         </div>
       </div>
