@@ -28,7 +28,7 @@ export function TimerControls({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="absolute z-10 bg-white rounded-2xl shadow-lg p-8 w-full max-w-md mx-auto"
+      className="absolute z-10 bg-white rounded-2xl shadow-lg p-8 w-full max-w-md mx-auto select-none"
     >
       <div className="text-center mb-8">
         <div className="relative inline-block overflow-hidden rounded-[8px]">
@@ -41,11 +41,10 @@ export function TimerControls({
           />
           <motion.div
             className="relative inline-block px-4 py-2 text-gray-800 text-sm z-10"
-            animate={{
+            style={{
               color: inputSequence ? "#ffffff" : "#1f2937",
               backgroundColor: inputSequence ? "transparent" : "#f3f4f6",
             }}
-            transition={{ duration: 0.5 }}
           >
             {inputSequence ? (() => {
               const minutes = parseFloat(inputSequence)

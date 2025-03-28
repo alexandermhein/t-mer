@@ -10,9 +10,9 @@ export default function TimerWrapper() {
   const getDurationFromParams = () => {
     const durationParam = searchParams.get("duration")
     if (durationParam) {
-      const match = durationParam.match(/(\d+)min/)
+      const match = durationParam.match(/(\d+(?:\.\d+)?)min/)
       if (match && match[1]) {
-        const minutes = Number.parseInt(match[1], 10)
+        const minutes = parseFloat(match[1])
         if (!isNaN(minutes) && minutes > 0) {
           // Limit to 30 minutes
           return Math.min(minutes, 30) * 60
