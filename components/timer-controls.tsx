@@ -96,13 +96,13 @@ export function TimerControls({
 
         <div className="text-gray-500 text-sm space-y-4">
           <div>
-            Use <span className="bg-gray-100 px-2 py-1 rounded">1-9</span> keys to set the timer duration.
+            Use your number keys <span className="bg-gray-100 px-2 py-1 rounded">1-9</span> to set the minutes.
           </div>
           <div>
-            Press <span className="bg-gray-100 px-2 py-1 rounded">Space</span> to start/stop the timer.
+            Press period <span className="bg-gray-100 px-2 py-1 rounded">.</span> to add 30 seconds increments.
           </div>
           <div>
-            Press <span className="bg-gray-100 px-2 py-1 rounded">R</span> to reset the timer.
+            Press <span className="bg-gray-100 px-2 py-1 rounded">Space</span> to start / stop and <span className="bg-gray-100 px-2 py-1 rounded">R</span> to reset.
           </div>
         </div>
       </div>
