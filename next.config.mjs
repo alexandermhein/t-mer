@@ -18,22 +18,16 @@ const nextConfig = {
   },
   output: 'standalone',
   experimental: {
-    // Disabled all experimental features to ensure stable build
+    // Only keeping necessary experimental features
     webpackBuildWorker: false,
     parallelServerBuildTraces: false,
     parallelServerCompiles: false,
-    serverActions: false,
-    serverComponentsExternalPackages: [],
-    optimizeCss: false,
-    optimizePackageImports: [],
-    instrumentationHook: false,
-    serverComponents: false,
-    typedRoutes: false,
-    webVitalsAttribution: [],
-    turbotrace: {
-      logLevel: 'error',
+    serverActions: {
+      allowedOrigins: ['localhost:3000'],
     },
   },
+  // Moved from experimental to root level
+  serverExternalPackages: [],
 }
 
 mergeConfig(nextConfig, userConfig)
