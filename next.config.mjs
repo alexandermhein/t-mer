@@ -16,11 +16,23 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  output: 'standalone',
   experimental: {
-    // Disabled experimental features that may cause build issues
+    // Disabled all experimental features to ensure stable build
     webpackBuildWorker: false,
     parallelServerBuildTraces: false,
     parallelServerCompiles: false,
+    serverActions: false,
+    serverComponentsExternalPackages: [],
+    optimizeCss: false,
+    optimizePackageImports: [],
+    instrumentationHook: false,
+    serverComponents: false,
+    typedRoutes: false,
+    webVitalsAttribution: [],
+    turbotrace: {
+      logLevel: 'error',
+    },
   },
 }
 
