@@ -22,9 +22,6 @@ const nextConfig = {
     webpackBuildWorker: false,
     parallelServerBuildTraces: false,
     parallelServerCompiles: false,
-    serverActions: {
-      allowedOrigins: ['localhost:3000'],
-    },
   },
   // Moved from experimental to root level
   serverExternalPackages: [],
