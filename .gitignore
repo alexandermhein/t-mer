@@ -49,3 +49,8 @@ next-env.d.ts
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# branch-specific
+feature/*
+bugfix/*
+hotfix/*
