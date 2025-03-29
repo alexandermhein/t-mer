@@ -1,10 +1,54 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useReducer, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNotification } from '@/hooks/use-notification'
 import { useAudio } from '@/hooks/use-audio'
 import { TimerState, TimerControls } from '@/types/timer'
 
+type TimerAction =
+  | { type: 'START' }
+  | { type: 'PAUSE' }
+  | { type: 'RESET' }
+  | { type: 'SET_DURATION'; payload: number }
+  | { type: 'SET_INPUT_SEQUENCE'; payload: string }
+  | { type: 'SET_ANIMATING'; payload: boolean }
+  | { type: 'TICK' }
+
+function timerReducer(state: TimerState, action: TimerAction): TimerState {
+  switch (action.type) {
+    case 'START':
+      return { ...state, isRunning: true, isPaused: false, showControls: false }
+    case 'PAUSE':
+      return { ...state, isRunning: false, isPaused: true, showControls: true }
+    case 'RESET':
+      return {
+        ...state,
+        isRunning: false,
+        isPaused: false,
+        remainingSeconds: state.totalSeconds,
+        showControls: true,
+      }
+    case 'SET_DURATION':
+      return {
+        ...state,
+        totalSeconds: action.payload,
+        remainingSeconds: action.payload,
+        isAnimating: false,
+      }
+    case 'SET_INPUT_SEQUENCE':
+      return { ...state, inputSequence: action.payload }
+    case 'SET_ANIMATING':
+      return { ...state, isAnimating: action.payload }
+    case 'TICK':
+      return {
+        ...state,
+        remainingSeconds: Math.max(0, state.remainingSeconds - 1),
+      }
+    default:
+      return state
+  }
+}
+
 export function useTimer(initialSeconds: number): [TimerState, TimerControls] {
-  const [state, setState] = useState<TimerState>({
+  const [state, dispatch] = useReducer(timerReducer, {
     totalSeconds: initialSeconds,
     remainingSeconds: initialSeconds,
     isRunning: false,
@@ -37,93 +81,68 @@ export function useTimer(initialSeconds: number): [TimerState, TimerControls] {
       const minutes = parseFloat(state.inputSequence)
       const limitedMinutes = Math.min(minutes, 30)
       if (!isNaN(limitedMinutes) && limitedMinutes > 0) {
-        const seconds = Math.round(limitedMinutes * 60)
-        setState(prev => ({
-          ...prev,
-          totalSeconds: seconds,
-          remainingSeconds: seconds,
-          isRunning: false,
-          isPaused: false,
-          showControls: true,
-          inputSequence: "",
-          isAnimating: false,
-        }))
+        dispatch({ type: 'SET_DURATION', payload: Math.round(limitedMinutes * 60) })
+        dispatch({ type: 'SET_INPUT_SEQUENCE', payload: "" })
       }
     }
   }, [state.inputSequence])
 
-  // Timer logic
+  // Timer logic with performance optimization
   useEffect(() => {
     if (state.isRunning) {
-      intervalRef.current = setInterval(() => {
-        setState(prev => {
-          if (prev.remainingSeconds <= 1) {
-            clearInterval(intervalRef.current as NodeJS.Timeout)
-            // Only send notification if we're actually completing (not already completed)
-            if (prev.remainingSeconds > 0) {
-              sendNotification("Timer Complete", "Your timer has finished!")
-              playNotificationSound()
-            }
-            return {
-              ...prev,
-              remainingSeconds: 0,
-              isRunning: false,
-              isPaused: false,
-              showControls: true,
-            }
+      const tick = () => {
+        dispatch({ type: 'TICK' })
+        if (state.remainingSeconds <= 1) {
+          clearInterval(intervalRef.current as NodeJS.Timeout)
+          if (state.remainingSeconds > 0) {
+            sendNotification("Timer Complete", "Your timer has finished!")
+            playNotificationSound()
           }
-          return {
-            ...prev,
-            remainingSeconds: prev.remainingSeconds - 1,
-          }
-        })
-      }, 1000)
-    } else if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
+          dispatch({ type: 'PAUSE' })
+        }
       }
+
+      // Use requestAnimationFrame for better performance
+      let animationFrameId: number
+      let lastTick = Date.now()
+      
+      const animate = () => {
+        const now = Date.now()
+        if (now - lastTick >= 1000) {
+          tick()
+          lastTick = now
+        }
+        animationFrameId = requestAnimationFrame(animate)
+      }
+
+      animationFrameId = requestAnimationFrame(animate)
+      return () => cancelAnimationFrame(animationFrameId)
     }
-  }, [state.isRunning, sendNotification, playNotificationSound])
+  }, [state.isRunning, state.remainingSeconds, sendNotification, playNotificationSound])
 
   // Effect to handle input sequence changes
   useEffect(() => {
     if (state.inputSequence) {
-      setState(prev => ({ ...prev, isAnimating: true }))
+      dispatch({ type: 'SET_ANIMATING', payload: true })
       const timeout = setTimeout(applyInputSequence, 500)
       return () => clearTimeout(timeout)
     }
   }, [state.inputSequence, applyInputSequence])
 
-  const controls: TimerControls = {
-    startTimer: () => setState(prev => ({ ...prev, isRunning: true, isPaused: false, showControls: false })),
-    pauseTimer: () => setState(prev => ({ ...prev, isRunning: false, isPaused: true, showControls: true })),
-    resetTimer: () => setState(prev => ({
-      ...prev,
-      isRunning: false,
-      isPaused: false,
-      remainingSeconds: prev.totalSeconds,
-      showControls: true,
-    })),
+  const controls = useMemo<TimerControls>(() => ({
+    startTimer: () => dispatch({ type: 'START' }),
+    pauseTimer: () => dispatch({ type: 'PAUSE' }),
+    resetTimer: () => dispatch({ type: 'RESET' }),
     handleSliderChange: (value: number[]) => {
-      const newSeconds = Math.round(value[0]) * 60
-      setState(prev => ({
-        ...prev,
-        totalSeconds: newSeconds,
-        remainingSeconds: newSeconds,
-        isAnimating: false,
-      }))
+      dispatch({ type: 'SET_DURATION', payload: Math.round(value[0]) * 60 })
     },
     setInputSequence: (value: string) => {
-      setState(prev => ({ ...prev, inputSequence: value }))
+      dispatch({ type: 'SET_INPUT_SEQUENCE', payload: value })
     },
     setIsAnimating: (value: boolean) => {
-      setState(prev => ({ ...prev, isAnimating: value }))
+      dispatch({ type: 'SET_ANIMATING', payload: value })
     },
-  }
+  }), [])
 
   return [state, controls]
 } 
