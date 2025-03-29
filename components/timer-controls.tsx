@@ -28,12 +28,12 @@ export function TimerControls({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="absolute z-10 bg-white rounded-2xl shadow-lg p-8 w-full max-w-md mx-auto select-none"
+      className="absolute z-10 bg-white rounded-2xl shadow-lg p-8 w-full max-w-md mx-auto select-none timer-controls-container"
     >
       <div className="text-center mb-8">
         <div className="relative inline-block overflow-hidden rounded-[8px]">
           <motion.div
-            key={inputSequence ? 'animating' : 'not-animating'}
+            key={`input-sequence-${inputSequence}-${Date.now()}`}
             className="absolute inset-0 bg-timer-purple origin-left"
             initial={{ scaleX: 0 }}
             animate={{ scaleX: inputSequence ? 1 : 0 }}
@@ -76,6 +76,21 @@ export function TimerControls({
           .slider-custom[data-disabled] {
             opacity: 0.7;
             cursor: not-allowed;
+          }
+          /* Add styles to properly hide cursor */
+          .timer-controls-container {
+            position: relative;
+            z-index: 9999;
+          }
+          .timer-controls-container * {
+            cursor: none !important;
+          }
+          .timer-controls-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: transparent;
+            z-index: 9998;
           }
         `}</style>
         <div className="slider-custom">
