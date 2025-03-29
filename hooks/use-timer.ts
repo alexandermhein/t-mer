@@ -58,9 +58,47 @@ export function useTimer(initialSeconds: number): [TimerState, TimerControls] {
     isAnimating: false,
   })
 
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const workerRef = useRef<Worker | null>(null)
   const { sendNotification } = useNotification()
   const { playNotificationSound } = useAudio()
+
+  // Initialize Web Worker
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      workerRef.current = new Worker(new URL('../workers/timer.worker.ts', import.meta.url))
+      
+      workerRef.current.onmessage = (e) => {
+        if (e.data.type === 'TICK') {
+          dispatch({ type: 'TICK' })
+        }
+      }
+
+      return () => {
+        workerRef.current?.terminate()
+      }
+    }
+  }, []) // Empty dependency array for worker initialization
+
+  // Handle timer completion
+  useEffect(() => {
+    if (state.remainingSeconds === 0 && state.isRunning) {
+      workerRef.current?.postMessage({ type: 'STOP' })
+      sendNotification("Timer Complete", "Your timer has finished!")
+      playNotificationSound()
+      dispatch({ type: 'PAUSE' })
+    }
+  }, [state.remainingSeconds, state.isRunning, sendNotification, playNotificationSound])
+
+  // Handle timer state changes
+  useEffect(() => {
+    if (workerRef.current) {
+      if (state.isRunning) {
+        workerRef.current.postMessage({ type: 'START' })
+      } else {
+        workerRef.current.postMessage({ type: 'STOP' })
+      }
+    }
+  }, [state.isRunning])
 
   // Request notification permission on mount
   useEffect(() => {
@@ -86,39 +124,6 @@ export function useTimer(initialSeconds: number): [TimerState, TimerControls] {
       }
     }
   }, [state.inputSequence])
-
-  // Timer logic with performance optimization
-  useEffect(() => {
-    if (state.isRunning) {
-      const tick = () => {
-        dispatch({ type: 'TICK' })
-        if (state.remainingSeconds <= 1) {
-          clearInterval(intervalRef.current as NodeJS.Timeout)
-          if (state.remainingSeconds > 0) {
-            sendNotification("Timer Complete", "Your timer has finished!")
-            playNotificationSound()
-          }
-          dispatch({ type: 'PAUSE' })
-        }
-      }
-
-      // Use requestAnimationFrame for better performance
-      let animationFrameId: number
-      let lastTick = Date.now()
-      
-      const animate = () => {
-        const now = Date.now()
-        if (now - lastTick >= 1000) {
-          tick()
-          lastTick = now
-        }
-        animationFrameId = requestAnimationFrame(animate)
-      }
-
-      animationFrameId = requestAnimationFrame(animate)
-      return () => cancelAnimationFrame(animationFrameId)
-    }
-  }, [state.isRunning, state.remainingSeconds, sendNotification, playNotificationSound])
 
   // Effect to handle input sequence changes
   useEffect(() => {
