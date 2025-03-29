@@ -1,4 +1,4 @@
-# T-Mer Timer App
+# T:MER – Simple Web-based Timer App
 
 A modern, minimalist timer application built with Next.js 13+ and TypeScript. Features a beautiful, responsive design with smooth animations and keyboard controls.
 
@@ -8,7 +8,6 @@ A modern, minimalist timer application built with Next.js 13+ and TypeScript. Fe
 - ⌨️ Keyboard-first controls
 - 🌓 Dark/Light mode support
 - ⚡ Smooth animations with Framer Motion
-- 🎨 Custom theme system
 - 📱 Fully responsive design
 - ♿ Accessibility focused
 
@@ -26,29 +25,35 @@ A modern, minimalist timer application built with Next.js 13+ and TypeScript. Fe
 - Node.js 18.0.0 or later
 - npm or yarn package manager
 
-## Getting Started
+## UI/UX Design Principles
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/t-mer.git
-   cd t-mer
-   ```
+### Visual Design
+- **Minimalist Aesthetic**: Clean, uncluttered interface focusing on essential elements
+- **Visual Hierarchy**: Clear distinction between primary and secondary information
+- **Consistent Spacing**: Systematic use of spacing for improved readability
+- **Typography**: Clear, legible font choices with appropriate sizing hierarchy
+- **Color Usage**: Purposeful color application for state indication and emphasis
 
-2. Install dependencies:
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+### Interaction Design
+- **Keyboard-First Approach**: All functionality accessible via keyboard
+- **Progressive Disclosure**: Controls appear contextually to reduce cognitive load
+- **Immediate Feedback**: Visual and auditory responses to user actions
+- **Gesture Support**: Touch-friendly interactions for mobile devices
+- **State Persistence**: Timer state maintained across page refreshes
 
-3. Start the development server:
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+### Animation Guidelines
+- **Purposeful Motion**: Animations serve functional purposes, not just decoration
+- **Performance**: Optimized animations for smooth performance
+- **Duration**: Quick, snappy transitions (150-300ms) for responsiveness
+- **Easing**: Natural easing curves for organic feel
+- **Reduced Motion**: Respects user preferences for reduced motion
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+### Accessibility Standards
+- **WCAG 2.1 Compliance**: Meeting AA level standards
+- **Keyboard Navigation**: Full keyboard accessibility
+- **Screen Reader Support**: Comprehensive ARIA implementation
+- **Color Contrast**: Meeting WCAG contrast requirements
+- **Focus Management**: Clear focus indicators and logical tab order
 
 ## Project Structure
 
@@ -74,7 +79,7 @@ t-mer/
 - `Space`: Start/Stop timer
 - `R`: Reset timer
 - `1-9`: Set duration (in minutes)
-- `Enter`: Apply duration input
+- `.`: Add 30 seconds increments (e.g. 3:30 minutes or 11:30 minutes)
 
 ## Development
 
@@ -104,40 +109,25 @@ The app uses a combination of:
 - Framer Motion for animations
 - Component-specific styles
 
-## Building for Production
+### UI/UX Development Guidelines
 
-1. Build the application:
-   ```bash
-   npm run build
-   # or
-   yarn build
-   ```
+1. **Component Design**
+   - Maintain consistent spacing and alignment
+   - Use semantic HTML elements
+   - Implement responsive breakpoints
+   - Follow accessibility best practices
 
-2. Start the production server:
-   ```bash
-   npm start
-   # or
-   yarn start
-   ```
+2. **State Management**
+   - Clear state transitions
+   - Predictable user feedback
+   - Error state handling
+   - Loading state management
 
-## Contributing
+3. **Performance**
+   - Optimize animations
+   - Minimize re-renders
+   - Efficient event handling
+   - Resource loading optimization
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Built with [Next.js](https://nextjs.org/)
-- Styled with [Tailwind CSS](https://tailwindcss.com/)
-- Animated with [Framer Motion](https://www.framer.com/motion/)
-
-## Built in Hong Kong 🇭🇰
 
 Created with ❤️ by Alexander Hein 
