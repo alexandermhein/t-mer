@@ -18,10 +18,8 @@ const nextConfig = {
   },
   output: 'standalone',
   experimental: {
-    // Only keeping necessary experimental features
+    // Minimal experimental features for stable build
     webpackBuildWorker: false,
-    parallelServerBuildTraces: false,
-    parallelServerCompiles: false,
   },
   // Moved from experimental to root level
   serverExternalPackages: [],
