@@ -8,9 +8,16 @@ import { useTimerKeyboard } from "@/hooks/use-timer-keyboard"
 import { TimerProps } from "@/types/timer"
 import { useEffect, useState } from "react"
 
-export default function Timer({ initialSeconds = 300 }: TimerProps) {
+export default function Timer({ initialSeconds = 300, autoStart = false }: TimerProps) {
   const [state, controls] = useTimer(initialSeconds)
   const [isFinished, setIsFinished] = useState(false)
+
+  // Auto-start timer if autoStart prop is true
+  useEffect(() => {
+    if (autoStart && !state.isRunning && !state.isPaused) {
+      controls.startTimer()
+    }
+  }, [autoStart])
 
   // Reset finished state when any key is pressed
   useEffect(() => {

@@ -23,7 +23,8 @@ export default function TimerWrapper() {
   }
 
   const initialSeconds = getDurationFromParams()
+  const shouldAutoStart = searchParams.has("duration")
 
-  return <Timer initialSeconds={initialSeconds} />
+  return <Timer initialSeconds={initialSeconds} autoStart={shouldAutoStart} />
 }
 

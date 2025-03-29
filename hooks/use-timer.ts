@@ -59,12 +59,16 @@ export function useTimer(initialSeconds: number): [TimerState, TimerControls] {
         setState(prev => {
           if (prev.remainingSeconds <= 1) {
             clearInterval(intervalRef.current as NodeJS.Timeout)
-            sendNotification("Timer Complete", "Your timer has finished!")
-            playNotificationSound()
+            // Only send notification if we're actually completing (not already completed)
+            if (prev.remainingSeconds > 0) {
+              sendNotification("Timer Complete", "Your timer has finished!")
+              playNotificationSound()
+            }
             return {
               ...prev,
               remainingSeconds: 0,
               isRunning: false,
+              isPaused: false,
               showControls: true,
             }
           }

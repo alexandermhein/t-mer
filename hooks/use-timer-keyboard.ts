@@ -36,6 +36,8 @@ export function useTimerKeyboard({
 
         if (isRunning) {
           pauseTimer()
+        } else if (isPaused) {
+          startTimer()
         } else {
           startTimer()
         }

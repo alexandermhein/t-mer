@@ -1,5 +1,6 @@
 export interface TimerProps {
   initialSeconds?: number
+  autoStart?: boolean
 }
 
 export interface TimerState {
