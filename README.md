@@ -1,4 +1,4 @@
-# T-Mer Timer App
+# t : mer
 
 A modern, minimalist timer application built with Next.js 13+ and TypeScript. Features a beautiful, responsive design with smooth animations and keyboard controls.
 
@@ -6,11 +6,7 @@ A modern, minimalist timer application built with Next.js 13+ and TypeScript. Fe
 
 - 🎯 Clean, minimalist interface
 - ⌨️ Keyboard-first controls
-- 🌓 Dark/Light mode support
-- ⚡ Smooth animations with Framer Motion
-- 🎨 Custom theme system
-- 📱 Fully responsive design
-- ♿ Accessibility focused
+- 🔗 Shareable timer states via URL
 
 ## Tech Stack
 
@@ -20,17 +16,14 @@ A modern, minimalist timer application built with Next.js 13+ and TypeScript. Fe
 - **Animations**: Framer Motion
 - **State Management**: React Hooks
 - **Theme**: Custom CSS Variables
+- **Testing**: Jest & React Testing Library
+- **Deployment**: Vercel
 
-## Prerequisites
-
-- Node.js 18.0.0 or later
-- npm or yarn package manager
-
-## Getting Started
+## Quick Start
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/t-mer.git
+   git clone https://github.com/alexandermhein/t-mer.git
    cd t-mer
    ```
 
@@ -39,6 +32,8 @@ A modern, minimalist timer application built with Next.js 13+ and TypeScript. Fe
    npm install
    # or
    yarn install
+   # or
+   pnpm install
    ```
 
 3. Start the development server:
@@ -46,9 +41,29 @@ A modern, minimalist timer application built with Next.js 13+ and TypeScript. Fe
    npm run dev
    # or
    yarn dev
+   # or
+   pnpm dev
    ```
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Documentation
+
+For comprehensive documentation, visit our [Wiki](https://github.com/alexandermhein/t-mer/wiki):
+
+- [Getting Started](https://github.com/alexandermhein/t-mer/wiki/Getting-Started)
+- [User Guide](https://github.com/alexandermhein/t-mer/wiki/User-Guide)
+- [Architecture](https://github.com/alexandermhein/t-mer/wiki/Architecture)
+- [Components](https://github.com/alexandermhein/t-mer/wiki/Components)
+- [Development Guide](https://github.com/alexandermhein/t-mer/wiki/Development-Guide)
+- [API Reference](https://github.com/alexandermhein/t-mer/wiki/API-Reference)
+- [Styling Guide](https://github.com/alexandermhein/t-mer/wiki/Styling-Guide)
+
+## Keyboard Controls
+
+- `Space`: Start/Stop timer
+- `R`: Reset timer
+- `1-9`: Set duration (in minutes)
 
 ## Project Structure
 
@@ -59,24 +74,28 @@ t-mer/
 │   ├── page.tsx           # Home page component
 │   └── globals.css        # Global styles
 ├── components/            # React components
-│   ├── Timer.tsx         # Main timer component
-│   ├── TimerDisplay.tsx  # Timer display component
-│   ├── TimerControls.tsx # Timer controls component
-│   ├── MouseTrail.tsx    # Mouse trail effect
-│   └── TimerWrapper.tsx  # Timer wrapper with URL params
-└── docs/                  # Documentation
-    ├── app/              # App documentation
-    └── components/       # Component documentation
+│   ├── timer.tsx         # Main timer component
+│   ├── timer-display.tsx  # Timer display component
+│   ├── timer-controls.tsx # Timer controls component
+│   ├── mouse-trail.tsx    # Mouse trail effect
+│   ├── theme-provider.tsx # Theme management
+│   ├── timer-wrapper.tsx  # URL parameter handling
+│   └── ui/              # Shared UI components
+├── hooks/                # Custom React hooks
+├── lib/                  # Utility functions
+├── styles/               # Additional styles
+├── types/                # TypeScript type definitions
+├── public/               # Static assets
+└── docs/                # Documentation
 ```
 
-## Keyboard Controls
-
-- `Space`: Start/Stop timer
-- `R`: Reset timer
-- `1-9`: Set duration (in minutes)
-- `Enter`: Apply duration input
-
 ## Development
+
+### Prerequisites
+
+- Node.js 18.0.0 or later
+- npm, yarn, or pnpm package manager
+- Git
 
 ### Code Style
 
@@ -86,31 +105,31 @@ The project uses TypeScript with strict type checking. Follow these guidelines:
 - Implement proper TypeScript types
 - Follow the existing component structure
 - Maintain accessibility standards
+- Write comprehensive tests
+- Document your changes
 
-### Component Documentation
+### Testing
 
-Each component is documented in the `docs/` directory with:
-- Technical details
-- Props interface
-- State management
-- Usage examples
-- Testing considerations
+```bash
+# Run unit tests
+npm run test
 
-### Styling
+# Run tests in watch mode
+npm run test:watch
 
-The app uses a combination of:
-- Tailwind CSS for utility classes
-- Custom CSS variables for theming
-- Framer Motion for animations
-- Component-specific styles
+# Generate coverage report
+npm run test:coverage
+```
 
-## Building for Production
+### Building for Production
 
 1. Build the application:
    ```bash
    npm run build
    # or
    yarn build
+   # or
+   pnpm build
    ```
 
 2. Start the production server:
@@ -118,25 +137,30 @@ The app uses a combination of:
    npm start
    # or
    yarn start
+   # or
+   pnpm start
    ```
 
 ## Contributing
 
+We welcome contributions! Please see our [Contributing Guide](https://github.com/alexandermhein/t-mer/wiki/Contributing) for details on how to get started.
+
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+3. Commit your changes (`git commit -m 'feat: add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [License](https://github.com/alexandermhein/t-mer/wiki/License) page for details.
 
 ## Acknowledgments
 
 - Built with [Next.js](https://nextjs.org/)
 - Styled with [Tailwind CSS](https://tailwindcss.com/)
 - Animated with [Framer Motion](https://www.framer.com/motion/)
+- Deployed on [Vercel](https://vercel.com)
 
 ## Built in Hong Kong 🇭🇰
 
