@@ -21,7 +21,7 @@ export function TimerDisplay({ remainingSeconds, isRunning, totalSeconds, showCo
       }}
       transition={{ duration: 0.3 }}
     >
-      {isFinished ? "FINISHED" : formatTime(remainingSeconds)}
+      {isFinished ? "READYYYYYYY" : formatTime(remainingSeconds)}
     </motion.div>
   )
 } 
