@@ -37,6 +37,7 @@ export function useTimerKeyboard({
   setIsAnimating,
 }: UseTimerKeyboardProps) {
   const inputTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isWindowActiveRef = useRef(typeof document !== 'undefined' ? !document.hidden : true)
 
   // Clear input timeout
   const clearInputTimeout = useCallback(() => {
@@ -110,8 +111,25 @@ export function useTimerKeyboard({
     }
   }, [isRunning, clearInputTimeout, applyInputSequence, startTimer, pauseTimer, resetTimer, setInputSequence, setIsAnimating])
 
+  // Effect to handle visibility change
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      isWindowActiveRef.current = !document.hidden
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [])
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Only process keyboard events if the window is active
+      if (!isWindowActiveRef.current) {
+        return
+      }
+
       const action: KeyboardAction = {
         key: e.key,
         code: e.code,

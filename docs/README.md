@@ -1,6 +1,6 @@
 # T:MER – Simple Web-based Timer App
 
-A modern, minimalist timer application built with Next.js 13+ and TypeScript. Features a beautiful, responsive design with smooth animations and keyboard controls.
+A modern, minimalist timer application built with Next.js 15.1.0 and TypeScript. Features a beautiful, responsive design with smooth animations and keyboard controls.
 
 ## Features
 
@@ -10,15 +10,18 @@ A modern, minimalist timer application built with Next.js 13+ and TypeScript. Fe
 - ⚡ Smooth animations with Framer Motion
 - 📱 Fully responsive design
 - ♿ Accessibility focused
+- ⏱️ Accurate timing with Web Workers
+- 🔄 Smooth duration change animations
 
 ## Tech Stack
 
-- **Framework**: Next.js 13+ (App Router)
+- **Framework**: Next.js 15.1.0 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Animations**: Framer Motion
 - **State Management**: React Hooks
 - **Theme**: Custom CSS Variables
+- **Timing**: Web Workers
 
 ## Prerequisites
 
@@ -47,6 +50,8 @@ A modern, minimalist timer application built with Next.js 13+ and TypeScript. Fe
 - **Duration**: Quick, snappy transitions (150-300ms) for responsiveness
 - **Easing**: Natural easing curves for organic feel
 - **Reduced Motion**: Respects user preferences for reduced motion
+- **Input Feedback**: Smooth animations for duration changes
+- **State Transitions**: Clear visual feedback for timer states
 
 ### Accessibility Standards
 - **WCAG 2.1 Compliance**: Meeting AA level standards
@@ -64,14 +69,16 @@ t-mer/
 │   ├── page.tsx           # Home page component
 │   └── globals.css        # Global styles
 ├── components/            # React components
-│   ├── Timer.tsx         # Main timer component
-│   ├── TimerDisplay.tsx  # Timer display component
-│   ├── TimerControls.tsx # Timer controls component
-│   ├── MouseTrail.tsx    # Mouse trail effect
-│   └── TimerWrapper.tsx  # Timer wrapper with URL params
-└── docs/                  # Documentation
-    ├── app/              # App documentation
-    └── components/       # Component documentation
+│   ├── timer-display.tsx  # Timer display component
+│   ├── timer-controls.tsx # Timer controls component
+│   └── timer-wrapper.tsx  # Timer wrapper with URL params
+├── hooks/                 # Custom React hooks
+│   └── use-timer.ts       # Timer logic and state management
+├── workers/              # Web Workers
+│   └── timer.worker.ts   # Timer accuracy worker
+└── docs/                 # Documentation
+    ├── app/             # App documentation
+    └── components/      # Component documentation
 ```
 
 ## Keyboard Controls
@@ -91,6 +98,7 @@ The project uses TypeScript with strict type checking. Follow these guidelines:
 - Implement proper TypeScript types
 - Follow the existing component structure
 - Maintain accessibility standards
+- Follow established animation patterns
 
 ### Component Documentation
 
@@ -122,12 +130,13 @@ The app uses a combination of:
    - Predictable user feedback
    - Error state handling
    - Loading state management
+   - Proper animation state handling
 
 3. **Performance**
    - Optimize animations
    - Minimize re-renders
    - Efficient event handling
    - Resource loading optimization
-
+   - Web Worker implementation for timing
 
 Created with ❤️ by Alexander Hein 

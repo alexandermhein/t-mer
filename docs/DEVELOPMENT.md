@@ -12,7 +12,7 @@ This document outlines the development setup, workflow, and best practices for t
 ## Environment Setup
 
 ### Prerequisites
-- Node.js (LTS version recommended)
+- Node.js 18.0.0 or later
 - Git
 - npm or yarn
 
@@ -32,9 +32,9 @@ This document outlines the development setup, workflow, and best practices for t
 
 3. Set up environment variables:
    ```bash
-   cp .env.example .env.local
+   cp .env.example .env.development
    ```
-   Edit `.env.local` with your specific configuration.
+   Edit `.env.development` with your specific configuration.
 
 ### Development Server
 To start the development server:
@@ -51,7 +51,7 @@ The application will be available at `http://localhost:3000`.
 - `main`: Production branch
 - `develop`: Development branch
 - Feature branches: `feature/*`
-- Bug fix branches: `fix/*`
+- Bug fix branches: `bugfix/*`
 - Release branches: `release/*`
 
 ### Workflow Steps
@@ -64,6 +64,8 @@ The application will be available at `http://localhost:3000`.
 
    # Create and switch to new feature branch
    git checkout -b feature/your-feature-name
+   # or for bug fixes
+   git checkout -b bugfix/your-fix-name
    ```
 
 2. **Making Changes**
@@ -122,26 +124,6 @@ The application will be available at `http://localhost:3000`.
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NODE_ENV=development
-
-# API Configuration
-NEXT_PUBLIC_API_URL=http://localhost:3000/api
-```
-
-### Optional Variables
-```env
-# Authentication
-AUTH_SECRET=your-secret-here
-AUTH_URL=http://localhost:3000
-
-# Database
-DATABASE_URL=your-database-url
-
-# External Services
-STRIPE_SECRET_KEY=your-stripe-secret-key
-STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
-
-# Analytics
-NEXT_PUBLIC_ANALYTICS_ID=your-analytics-id
 ```
 
 ## Development Guidelines
@@ -151,6 +133,7 @@ NEXT_PUBLIC_ANALYTICS_ID=your-analytics-id
 - Use ESLint and Prettier for code formatting
 - Write meaningful comments for complex logic
 - Keep components small and focused
+- Follow the established animation patterns for consistency
 
 ### Testing
 - Write unit tests for critical functionality
@@ -163,10 +146,11 @@ NEXT_PUBLIC_ANALYTICS_ID=your-analytics-id
   ```
 
 ### Performance
-- Optimize images and assets
+- Optimize animations for smooth performance
 - Implement proper code splitting
 - Monitor bundle size
 - Use performance monitoring tools
+- Ensure timer accuracy with Web Workers
 
 ## Deployment
 
@@ -189,7 +173,7 @@ NEXT_PUBLIC_ANALYTICS_ID=your-analytics-id
 
 ### Common Issues
 1. **Environment Variables Not Loading**
-   - Ensure `.env.local` exists
+   - Ensure `.env.development` exists
    - Check variable naming (NEXT_PUBLIC_ prefix for client-side)
    - Restart development server
 
@@ -203,6 +187,12 @@ NEXT_PUBLIC_ANALYTICS_ID=your-analytics-id
    - Use `git status` to check current state
    - Ensure you're on the correct branch
    - Pull latest changes before starting work
+
+4. **Timer Animation Issues**
+   - Check animation state management
+   - Verify input sequence handling
+   - Ensure proper cleanup of timeouts
+   - Test with various input patterns
 
 ## Support
 
