@@ -6,18 +6,40 @@ import { TimerControls } from "./timer-controls"
 import { useTimer } from "@/hooks/use-timer"
 import { useTimerKeyboard } from "@/hooks/use-timer-keyboard"
 import { TimerProps } from "@/types/timer"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 
 export default function Timer({ initialSeconds = 300, autoStart = false }: TimerProps) {
   const [state, controls] = useTimer(initialSeconds)
   const [isFinished, setIsFinished] = useState(false)
+
+  // Handle timer input sequence application
+  const handleApplyInputSequence = useCallback(() => {
+    if (!state.inputSequence) return
+    
+    const minutes = Number.parseInt(state.inputSequence, 10)
+    const limitedMinutes = Math.min(minutes, 30)
+    
+    if (!isNaN(limitedMinutes) && limitedMinutes > 0) {
+      controls.handleSliderChange([limitedMinutes])
+    }
+  }, [state.inputSequence, controls])
+
+  // Handle input sequence changes with support for function updates
+  const handleSetInputSequence = useCallback((value: string | ((prev: string) => string)) => {
+    if (typeof value === 'function') {
+      const newValue = value(state.inputSequence)
+      controls.setInputSequence(newValue)
+    } else {
+      controls.setInputSequence(value)
+    }
+  }, [state.inputSequence, controls])
 
   // Auto-start timer if autoStart prop is true
   useEffect(() => {
     if (autoStart && !state.isRunning && !state.isPaused) {
       controls.startTimer()
     }
-  }, [autoStart])
+  }, [autoStart, state.isRunning, state.isPaused, controls])
 
   // Reset finished state when any key is pressed
   useEffect(() => {
@@ -38,34 +60,17 @@ export default function Timer({ initialSeconds = 300, autoStart = false }: Timer
     }
   }, [state.remainingSeconds, state.isRunning])
 
+  // Setup keyboard controls
   useTimerKeyboard({
     isRunning: state.isRunning,
     isPaused: state.isPaused,
     inputSequence: state.inputSequence,
-    applyInputSequence: () => {
-      if (state.inputSequence) {
-        const minutes = Number.parseInt(state.inputSequence, 10)
-        const limitedMinutes = Math.min(minutes, 30)
-        if (!isNaN(limitedMinutes) && limitedMinutes > 0) {
-          const seconds = limitedMinutes * 60
-          controls.handleSliderChange([limitedMinutes])
-        }
-      }
-    },
+    applyInputSequence: handleApplyInputSequence,
     startTimer: controls.startTimer,
     pauseTimer: controls.pauseTimer,
     resetTimer: controls.resetTimer,
-    setInputSequence: (value) => {
-      if (typeof value === 'function') {
-        const newValue = value(state.inputSequence)
-        controls.setInputSequence(newValue)
-      } else {
-        controls.setInputSequence(value)
-      }
-    },
-    setIsAnimating: (value) => {
-      controls.setIsAnimating(value)
-    },
+    setInputSequence: handleSetInputSequence,
+    setIsAnimating: controls.setIsAnimating,
   })
 
   return (

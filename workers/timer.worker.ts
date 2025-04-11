@@ -1,37 +1,48 @@
-let timerId: number | null = null;
-let lastTick: number = 0;
-let isRunning: boolean = false;
-
-function preciseTimer() {
-  if (!isRunning) return;
-  
-  const now = Date.now();
-  const elapsed = now - lastTick;
-  
-  if (elapsed >= 1000) {
-    self.postMessage({ type: 'TICK' });
-    lastTick = now - (elapsed % 1000); // Adjust for drift
-  }
-  
-  timerId = self.requestAnimationFrame(preciseTimer);
-}
+let intervalId: ReturnType<typeof setInterval> | null = null;
+let targetTime: number | null = null;
+let isRunning = false;
 
 self.onmessage = (e: MessageEvent) => {
-  const { type, payload } = e.data;
+  const { type } = e.data;
 
   switch (type) {
     case 'START':
-      isRunning = true;
-      lastTick = Date.now();
-      timerId = self.requestAnimationFrame(preciseTimer);
+      if (!isRunning) {
+        isRunning = true;
+        targetTime = Date.now() + 1000; // Next tick should be 1 second from now
+        startTimer();
+      }
       break;
 
     case 'STOP':
       isRunning = false;
-      if (timerId !== null) {
-        self.cancelAnimationFrame(timerId);
-        timerId = null;
+      if (intervalId !== null) {
+        clearInterval(intervalId);
+        intervalId = null;
       }
       break;
   }
-}; 
+};
+
+function startTimer() {
+  // Clear any existing interval
+  if (intervalId !== null) {
+    clearInterval(intervalId);
+  }
+  
+  // Use setInterval with a short interval for more precise timing
+  intervalId = setInterval(() => {
+    if (!isRunning || targetTime === null) return;
+    
+    const now = Date.now();
+    
+    if (now >= targetTime) {
+      // Send tick and set the next target time
+      self.postMessage({ type: 'TICK' });
+      
+      // Calculate the next target time based on the current one
+      // This approach prevents timing drift by anchoring to the original sequence
+      targetTime += 1000;
+    }
+  }, 100); // Check every 100ms for better precision
+} 

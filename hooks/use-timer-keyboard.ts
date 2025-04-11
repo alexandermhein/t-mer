@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
 
-// Keyboard configuration
+// Keyboard configuration constants
 const KEYBOARD_CONFIG = {
   inputTimeout: 500,
   maxInputLength: 2,
@@ -39,7 +39,7 @@ export function useTimerKeyboard({
   const inputTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isWindowActiveRef = useRef(typeof document !== 'undefined' ? !document.hidden : true)
 
-  // Clear input timeout
+  // Clear any existing input timeout
   const clearInputTimeout = useCallback(() => {
     if (inputTimeoutRef.current) {
       clearTimeout(inputTimeoutRef.current)
@@ -47,7 +47,7 @@ export function useTimerKeyboard({
     }
   }, [])
 
-  // Handle numeric input
+  // Handle numeric input (0-9)
   const handleNumericInput = useCallback((key: string) => {
     clearInputTimeout()
     setInputSequence((prev: string) => {
@@ -58,7 +58,7 @@ export function useTimerKeyboard({
 
       // Handle decimal input
       if (prev.includes('.')) {
-        const [whole, decimal] = prev.split('.')
+        const [, decimal] = prev.split('.')
         if (decimal.length < KEYBOARD_CONFIG.maxDecimalPlaces) {
           return prev + key
         }
@@ -86,7 +86,7 @@ export function useTimerKeyboard({
     })
   }, [clearInputTimeout, setInputSequence])
 
-  // Handle timer control
+  // Handle timer control (space/r keys)
   const handleTimerControl = useCallback((action: KeyboardAction) => {
     action.preventDefault()
     clearInputTimeout()
@@ -109,9 +109,51 @@ export function useTimerKeyboard({
         resetTimer()
         break
     }
-  }, [isRunning, clearInputTimeout, applyInputSequence, startTimer, pauseTimer, resetTimer, setInputSequence, setIsAnimating])
+  }, [
+    isRunning,
+    clearInputTimeout,
+    applyInputSequence,
+    startTimer,
+    pauseTimer,
+    resetTimer,
+    setInputSequence,
+    setIsAnimating
+  ])
 
-  // Effect to handle visibility change
+  // Handle all key events
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    // Skip processing if window is not active
+    if (!isWindowActiveRef.current) {
+      return
+    }
+
+    const action: KeyboardAction = {
+      key: e.key,
+      code: e.code,
+      preventDefault: () => e.preventDefault(),
+    }
+
+    // Handle timer controls (space/r)
+    if (e.code === 'Space' || e.code === 'KeyR') {
+      handleTimerControl(action)
+      return
+    }
+
+    // Handle numeric input (0-9)
+    if (e.key >= '0' && e.key <= '9') {
+      e.preventDefault()
+      handleNumericInput(e.key)
+      return
+    }
+
+    // Handle decimal input (.)
+    if (e.key === '.') {
+      e.preventDefault()
+      handleDecimalInput()
+    }
+  }, [handleTimerControl, handleNumericInput, handleDecimalInput])
+
+  // Track window/document visibility
   useEffect(() => {
     const handleVisibilityChange = () => {
       isWindowActiveRef.current = !document.hidden
@@ -123,45 +165,15 @@ export function useTimerKeyboard({
     }
   }, [])
 
+  // Set up keyboard event handlers
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Only process keyboard events if the window is active
-      if (!isWindowActiveRef.current) {
-        return
-      }
-
-      const action: KeyboardAction = {
-        key: e.key,
-        code: e.code,
-        preventDefault: () => e.preventDefault(),
-      }
-
-      // Handle timer controls
-      if (e.code === 'Space' || e.code === 'KeyR') {
-        handleTimerControl(action)
-        return
-      }
-
-      // Handle numeric input
-      if (e.key >= '0' && e.key <= '9') {
-        e.preventDefault()
-        handleNumericInput(e.key)
-        return
-      }
-
-      // Handle decimal input
-      if (e.key === '.') {
-        e.preventDefault()
-        handleDecimalInput()
-      }
-    }
-
     window.addEventListener("keydown", handleKeyDown)
+    
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
       clearInputTimeout()
     }
-  }, [handleTimerControl, handleNumericInput, handleDecimalInput, clearInputTimeout])
+  }, [handleKeyDown, clearInputTimeout])
 
   return inputTimeoutRef
 } 

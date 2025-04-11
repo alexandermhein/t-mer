@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useMemo } from "react"
 
 interface Particle {
   id: number
@@ -16,18 +16,27 @@ interface Particle {
   scale: number
 }
 
+// Pre-define colors for better performance
 const COLORS = [
   "rgba(199, 50, 179, 1)",    // #C732B3 at full opacity
   "rgba(199, 50, 179, 0.8)",  // #C732B3 at 80% opacity
   "rgba(199, 50, 179, 0.6)",  // #C732B3 at 60% opacity
 ]
 
+// Animation constants
+const ANIMATION_CONSTANTS = {
+  minTimeBetweenParticles: 8,
+  lifeFadeRate: 0.011,
+  velocityDecay: 0.98,
+  frameInterval: 16, // ~60fps
+}
+
 export default function MouseTrail() {
   const [particles, setParticles] = useState<Particle[]>([])
   const [particleId, setParticleId] = useState(0)
 
+  // Add custom cursor style only once on mount
   useEffect(() => {
-    // Add custom cursor style
     const style = document.createElement('style')
     style.textContent = `
       * {
@@ -44,14 +53,16 @@ export default function MouseTrail() {
     }
   }, [])
 
-  const createParticle = useCallback((x: number, y: number) => {
+  // Create a new particle with random properties
+  const createParticle = useCallback((x: number, y: number): Particle => {
     const angle = Math.random() * Math.PI * 2
-    const speed = Math.random() * 0.2 + 0.1 // Faster movement
+    const speed = Math.random() * 0.2 + 0.1
+    
     return {
       id: particleId,
       x,
       y,
-      size: Math.random() * 6 + 4, // Slightly smaller particles
+      size: Math.random() * 6 + 4,
       opacity: 1,
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
       velocity: {
@@ -59,21 +70,24 @@ export default function MouseTrail() {
         y: Math.sin(angle) * speed
       },
       life: 1,
-      rotation: Math.random() * 360, // Random initial rotation
-      rotationSpeed: (Math.random() - 0.5) * 10, // Random rotation speed
+      rotation: Math.random() * 360,
+      rotationSpeed: (Math.random() - 0.5) * 10,
       scale: 1
     }
   }, [particleId])
 
+  // Handle mouse movement and particle creation
   useEffect(() => {
     let lastTime = 0
-    const minTimeBetweenParticles = 8 // More frequent particles
+    const { minTimeBetweenParticles } = ANIMATION_CONSTANTS
 
     const handleMouseMove = (e: MouseEvent) => {
       const currentTime = performance.now()
       
+      // Only create particles at specified intervals for performance
       if (currentTime - lastTime >= minTimeBetweenParticles) {
         const newParticle = createParticle(e.clientX, e.clientY)
+        
         setParticles(prev => [...prev, newParticle])
         setParticleId(prev => prev + 1)
         lastTime = currentTime
@@ -84,54 +98,65 @@ export default function MouseTrail() {
     return () => window.removeEventListener("mousemove", handleMouseMove)
   }, [createParticle])
 
+  // Update particle positions and properties in animation loop
   useEffect(() => {
+    const { lifeFadeRate, velocityDecay, frameInterval } = ANIMATION_CONSTANTS
+    
     const interval = setInterval(() => {
       setParticles(prev => {
-        const updatedParticles = prev.map(particle => {
-          const newLife = particle.life - 0.011 // 10% faster fade out
-          const newScale = 0.5 + newLife * 0.5 // Scale down as life decreases
-          
-          return {
-            ...particle,
-            x: particle.x + particle.velocity.x,
-            y: particle.y + particle.velocity.y,
-            opacity: newLife,
-            life: newLife,
-            rotation: particle.rotation + particle.rotationSpeed,
-            scale: newScale,
-            // Just slow down the movement
-            velocity: {
-              x: particle.velocity.x * 0.98,
-              y: particle.velocity.y * 0.98
+        // Skip update if no particles exist
+        if (prev.length === 0) return prev
+        
+        return prev
+          .map(particle => {
+            const newLife = particle.life - lifeFadeRate
+            const newScale = 0.5 + newLife * 0.5
+            
+            return {
+              ...particle,
+              x: particle.x + particle.velocity.x,
+              y: particle.y + particle.velocity.y,
+              opacity: newLife,
+              life: newLife,
+              rotation: particle.rotation + particle.rotationSpeed,
+              scale: newScale,
+              velocity: {
+                x: particle.velocity.x * velocityDecay,
+                y: particle.velocity.y * velocityDecay
+              }
             }
-          }
-        })
-        return updatedParticles.filter(particle => particle.life > 0)
+          })
+          .filter(particle => particle.life > 0)
       })
-    }, 16)
+    }, frameInterval)
 
     return () => clearInterval(interval)
   }, [])
 
+  // Memoize particle rendering to prevent unnecessary re-renders
+  const particleElements = useMemo(() => {
+    return particles.map(particle => (
+      <div
+        key={particle.id}
+        className="absolute rounded-full"
+        style={{
+          left: particle.x - particle.size / 2,
+          top: particle.y - particle.size / 2,
+          width: particle.size,
+          height: particle.size,
+          opacity: particle.opacity,
+          backgroundColor: particle.color,
+          boxShadow: `0 0 ${particle.size * 3}px ${particle.color}`,
+          transform: `rotate(${particle.rotation}deg) scale(${particle.scale})`,
+          willChange: "transform, opacity"
+        }}
+      />
+    ))
+  }, [particles])
+
   return (
     <div className="fixed inset-0 pointer-events-none z-50">
-      {particles.map(particle => (
-        <div
-          key={particle.id}
-          className="absolute rounded-full"
-          style={{
-            left: particle.x - particle.size / 2,
-            top: particle.y - particle.size / 2,
-            width: particle.size,
-            height: particle.size,
-            opacity: particle.opacity,
-            backgroundColor: particle.color,
-            boxShadow: `0 0 ${particle.size * 3}px ${particle.color}`,
-            transform: `rotate(${particle.rotation}deg) scale(${particle.scale})`,
-            willChange: "transform, opacity"
-          }}
-        />
-      ))}
+      {particleElements}
     </div>
   )
 } 
