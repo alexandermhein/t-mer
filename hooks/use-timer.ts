@@ -11,6 +11,7 @@ type TimerAction =
   | { type: 'SET_INPUT_SEQUENCE'; payload: string }
   | { type: 'SET_ANIMATING'; payload: boolean }
   | { type: 'TICK' }
+  | { type: 'SYNC_TIME'; payload: number }
 
 function timerReducer(state: TimerState, action: TimerAction): TimerState {
   switch (action.type) {
@@ -42,6 +43,11 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
         ...state,
         remainingSeconds: Math.max(0, state.remainingSeconds - 1),
       }
+    case 'SYNC_TIME':
+      return {
+        ...state,
+        remainingSeconds: Math.max(0, action.payload),
+      }
     default:
       return state
   }
@@ -59,6 +65,7 @@ export function useTimer(initialSeconds: number): [TimerState, TimerControls] {
   })
 
   const workerRef = useRef<Worker | null>(null)
+  const startTimeRef = useRef<number | null>(null)
   const { sendNotification } = useNotification()
   const { playNotificationSound } = useAudio()
 
@@ -79,6 +86,27 @@ export function useTimer(initialSeconds: number): [TimerState, TimerControls] {
     }
   }, []) // Empty dependency array for worker initialization
 
+  // Handle visibility change
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    const syncTimerOnVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && state.isRunning && startTimeRef.current) {
+        // Calculate what the remaining seconds should be based on elapsed time
+        const elapsedSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        const calculatedRemaining = Math.max(0, state.totalSeconds - elapsedSeconds);
+        
+        // Only update if there's a significant difference
+        if (Math.abs(calculatedRemaining - state.remainingSeconds) > 1) {
+          dispatch({ type: 'SYNC_TIME', payload: calculatedRemaining });
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', syncTimerOnVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', syncTimerOnVisibilityChange);
+  }, [state.isRunning, state.totalSeconds, state.remainingSeconds]);
+
   // Handle timer completion
   useEffect(() => {
     if (state.remainingSeconds === 0 && state.isRunning) {
@@ -86,6 +114,7 @@ export function useTimer(initialSeconds: number): [TimerState, TimerControls] {
       sendNotification("Timer Complete", "Your timer has finished!")
       playNotificationSound()
       dispatch({ type: 'PAUSE' })
+      startTimeRef.current = null;
     }
   }, [state.remainingSeconds, state.isRunning, sendNotification, playNotificationSound])
 
@@ -93,12 +122,18 @@ export function useTimer(initialSeconds: number): [TimerState, TimerControls] {
   useEffect(() => {
     if (workerRef.current) {
       if (state.isRunning) {
+        // Store start time when timer starts
+        const secondsElapsed = state.totalSeconds - state.remainingSeconds;
+        startTimeRef.current = Date.now() - (secondsElapsed * 1000);
         workerRef.current.postMessage({ type: 'START' })
       } else {
         workerRef.current.postMessage({ type: 'STOP' })
+        if (!state.isPaused) {
+          startTimeRef.current = null;
+        }
       }
     }
-  }, [state.isRunning])
+  }, [state.isRunning, state.totalSeconds, state.remainingSeconds, state.isPaused])
 
   // Request notification permission on mount
   useEffect(() => {
