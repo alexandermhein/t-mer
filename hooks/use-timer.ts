@@ -46,7 +46,7 @@ function timerReducer(state: TimerState, action: TimerAction): TimerState {
     case 'SYNC_TIME':
       return {
         ...state,
-        remainingSeconds: Math.max(0, action.payload),
+        remainingSeconds: Math.max(0, Math.round(action.payload)),
       }
     default:
       return state
@@ -74,7 +74,7 @@ export function useTimer(initialSeconds: number): [TimerState, TimerControls] {
     if (typeof window !== 'undefined') {
       workerRef.current = new Worker(new URL('../workers/timer.worker.ts', import.meta.url))
       
-      workerRef.current.onmessage = (e) => {
+      workerRef.current.onmessage = (e: MessageEvent) => {
         if (e.data.type === 'TICK') {
           dispatch({ type: 'TICK' })
         }
@@ -93,18 +93,35 @@ export function useTimer(initialSeconds: number): [TimerState, TimerControls] {
     const syncTimerOnVisibilityChange = () => {
       if (document.visibilityState === 'visible' && state.isRunning && startTimeRef.current) {
         // Calculate what the remaining seconds should be based on elapsed time
-        const elapsedSeconds = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        const elapsedMillis = Date.now() - startTimeRef.current;
+        const elapsedSeconds = elapsedMillis / 1000; // Use floating point for more precision
         const calculatedRemaining = Math.max(0, state.totalSeconds - elapsedSeconds);
         
-        // Only update if there's a significant difference
-        if (Math.abs(calculatedRemaining - state.remainingSeconds) > 1) {
-          dispatch({ type: 'SYNC_TIME', payload: calculatedRemaining });
-        }
+        // Always sync the timer when tab becomes visible to ensure accuracy
+        dispatch({ type: 'SYNC_TIME', payload: calculatedRemaining });
       }
     };
 
     document.addEventListener('visibilitychange', syncTimerOnVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', syncTimerOnVisibilityChange);
+    
+    // Also sync periodically even while tab is visible
+    const periodicSync = setInterval(() => {
+      if (state.isRunning && startTimeRef.current) {
+        const elapsedMillis = Date.now() - startTimeRef.current;
+        const elapsedSeconds = elapsedMillis / 1000;
+        const calculatedRemaining = Math.max(0, state.totalSeconds - elapsedSeconds);
+        
+        // Only update if there's a significant difference
+        if (Math.abs(calculatedRemaining - state.remainingSeconds) > 0.5) {
+          dispatch({ type: 'SYNC_TIME', payload: calculatedRemaining });
+        }
+      }
+    }, 10000); // Sync every 10 seconds
+    
+    return () => {
+      document.removeEventListener('visibilitychange', syncTimerOnVisibilityChange);
+      clearInterval(periodicSync);
+    };
   }, [state.isRunning, state.totalSeconds, state.remainingSeconds]);
 
   // Handle timer completion

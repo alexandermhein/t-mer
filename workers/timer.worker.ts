@@ -4,18 +4,27 @@ let lastTick: number = 0;
 let isRunning: boolean = false;
 let startTime: number = 0;
 let elapsedTime: number = 0;
+let tickCount: number = 0;
 
 function preciseTimer() {
   if (!isRunning) return;
   
   const now = Date.now();
-  const elapsed = now - lastTick;
+  const targetElapsed = tickCount * 1000;
+  const actualElapsed = now - startTime;
+  const drift = actualElapsed - targetElapsed;
   
-  if (elapsed >= 1000) {
+  // If we've reached or passed the time for the next tick (accounting for drift)
+  if (actualElapsed >= tickCount * 1000) {
     self.postMessage({ type: 'TICK' });
-    lastTick = now - (elapsed % 1000); // Adjust for drift
+    tickCount++;
   }
   
+  // Calculate optimal delay to minimize drift
+  const nextTickTime = startTime + (tickCount * 1000);
+  const timeUntilNextTick = nextTickTime - now;
+  
+  // Use requestAnimationFrame for the next frame
   timerId = self.requestAnimationFrame(preciseTimer);
 }
 
@@ -23,21 +32,24 @@ function preciseTimer() {
 function startBackgroundTimer() {
   if (intervalId !== null) return;
   
-  startTime = Date.now() - elapsedTime;
+  // Reset tick counter when starting timer
+  tickCount = 0;
+  startTime = Date.now();
+  elapsedTime = 0;
   
+  // Backup interval that checks more frequently than once per second
   intervalId = self.setInterval(() => {
     if (!isRunning) return;
     
     const now = Date.now();
-    const currentElapsed = now - startTime;
-    const secondsElapsed = Math.floor(currentElapsed / 1000);
-    const previousSeconds = Math.floor(elapsedTime / 1000);
+    const targetElapsed = tickCount * 1000;
+    const actualElapsed = now - startTime;
     
-    if (secondsElapsed > previousSeconds) {
+    // If we've reached the time for the next tick and haven't ticked yet
+    if (actualElapsed >= targetElapsed) {
       self.postMessage({ type: 'TICK' });
+      tickCount++;
     }
-    
-    elapsedTime = currentElapsed;
   }, 100); // Check frequently to ensure we don't miss seconds
 }
 
@@ -47,9 +59,9 @@ self.onmessage = (e: MessageEvent) => {
   switch (type) {
     case 'START':
       isRunning = true;
-      lastTick = Date.now();
       startTime = Date.now();
       elapsedTime = 0;
+      tickCount = 0;
       
       // Use both timers for maximum reliability
       timerId = self.requestAnimationFrame(preciseTimer);
