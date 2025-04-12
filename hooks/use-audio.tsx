@@ -5,7 +5,7 @@ import { useRef, useCallback, useEffect } from "react"
 // Constants for sound configuration
 const SOUND_CONFIG = {
   frequencies: [880, 1108.73, 1318.51, 1760], // A5, C#6, E6, A6
-  volume: 0.4,
+  volume: 0.6,
   attackTime: 0.05,
   releaseTime: 0.5,
   noteDelay: 0.1,
